@@ -6,6 +6,7 @@ export class LoginPage {
     readonly passwordInput: Locator;
     readonly signInButton: Locator;
     readonly errorMessage: Locator;
+    readonly needAnAccountLink: Locator;
 
     constructor(page: Page) {
         this.page = page;
@@ -13,6 +14,7 @@ export class LoginPage {
         this.passwordInput = page.getByPlaceholder('Password');
         this.signInButton = page.getByRole('button', { name: 'Sign in' });
         this.errorMessage = page.getByText('credentials invalid');
+        this.needAnAccountLink = page.getByRole('link', { name: 'Need an account?' });
     }
 
     async goto() {

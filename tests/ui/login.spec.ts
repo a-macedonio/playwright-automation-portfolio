@@ -3,6 +3,7 @@ import { HomePage } from '../../pages/HomePage';
 import { LoginPage } from '../../pages/LoginPage';
 import { Navbar } from '../../components/Navbar';
 import { signUpUser } from '../../utils/api/authApi';
+import { RegisterPage } from '../../pages/RegisterPage';
 
 test('Successful login', async ({ page }) => {
   const timestamp = Date.now();
@@ -14,16 +15,13 @@ test('Successful login', async ({ page }) => {
   await signUpUser(email, password, username);
 
   const loginPage = new LoginPage(page);
-  const navbar = new Navbar(page);
+  const navBar = new Navbar(page);
   const homePage = new HomePage(page);
 
   await loginPage.goto();
   await loginPage.login(email, password);
 
-  console.log('email: ', email);
-  console.log('password: ', password);
-
-  await navbar.expectUserLoggedIn(username);
+  await navBar.expectUserLoggedIn(username);
   await homePage.expectHomePageLoaded();
   await homePage.expectGlobalFeedLoaded();
   await homePage.expectYourFeedTabToBeVisible();
@@ -57,13 +55,23 @@ test('Login with non-existent email', async ({ page }) => {
   await loginPage.expectInvalidCredentialsMessage();
 });
 
-test('User can navigate to Sign In from home', async ({ page }) => {
+test('User can navigate from Home to Login ', async ({ page }) => {
   const homePage = new HomePage(page);
   const loginPage = new LoginPage(page);
-  const navbar = new Navbar(page);
+  const navBar = new Navbar(page);
 
   await homePage.goto();
-  await navbar.signInLink.click();
+  await navBar.signInLink.click();
+
+  await loginPage.expectLoginPageLoaded();
+});
+
+test('User can navigate from Sign Up to Login' , async ({ page }) => {
+  const signUp = new RegisterPage(page);
+  const loginPage = new LoginPage(page);
+
+  await signUp.goto();
+  await signUp.haveAnAccountLink.click();
 
   await loginPage.expectLoginPageLoaded();
 });
