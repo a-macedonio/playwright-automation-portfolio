@@ -5,9 +5,9 @@ import { HomePage } from '../../pages/HomePage';
 import { LoginPage } from '../../pages/LoginPage';
 
 test('Successful SignUp', async ({ page }) => {
-    const timestamp = Date.now();
+    const uniqueId = crypto.randomUUID().replace(/-/g, '');
     const username = 'Rigo'
-    const email = `rigo_${timestamp}@test.com`;
+    const email = `rigo_${uniqueId}@test.com`;
     const password = 'Password123'
 
     const registerPage = new RegisterPage(page);

@@ -1,25 +1,23 @@
 import { test } from '@playwright/test';
 import { Navbar } from '../../components/Navbar';
 import { EditorPage } from '../../pages/EditorPage';
-import { LoginPage } from '../../pages/LoginPage';
 import { signUpUser } from '../../utils/api/authApi';
 import { ArticlePage } from '../../pages/ArticlePage';
 
-test('Create new article', async ({ page }) => {
+test('Authenticated user can create a new article', async ({ page }) => {
 
-    const timestamp = Date.now();
+    const uniqueId = crypto.randomUUID().replace(/-/g, '');
 
-    const email = `andres_${timestamp}@test.com`;
+    const email = `andres_${uniqueId}@test.com`;
     const password = 'Password123';
-    const username = `andres_${timestamp}`;
+    const username = `andres_${uniqueId}`;
 
     const navBar = new Navbar(page);
-    const loginPage = new LoginPage(page);
     const editorPage = new EditorPage(page);
     const articlePage = new ArticlePage(page);
 
     const newArticle = {
-        title: `Generic Title ${timestamp}`,
+        title: `Generic Title ${uniqueId}`,
         description: "This is a test article",
         body: "This is test content",
         tags: ["music", "lyrics"]
@@ -41,5 +39,73 @@ test('Create new article', async ({ page }) => {
 
     await editorPage.createNewArticle(newArticle.title, newArticle.description, newArticle.body, newArticle.tags);
     await articlePage.expectHeadingToContain(newArticle.title);
+    await articlePage.expectBodyToContain(newArticle.body);
     await articlePage.expectAuthorToContain(username);
+    await articlePage.expectTagsToContain(newArticle.tags);
+});
+
+test('Authenticated user can edit own article', async ({ page }) => {
+  const uniqueId = crypto.randomUUID().replace(/-/g, '');
+
+  const email = `andres_${uniqueId}@test.com`;
+  const password = 'Password123';
+  const username = `andres_${uniqueId}`;
+
+  const navBar = new Navbar(page);
+  const editorPage = new EditorPage(page);
+  const articlePage = new ArticlePage(page);
+
+  const newArticle = {
+    title: `Original Title ${uniqueId}`,
+    description: 'This is the original description',
+    body: 'This is the original content',
+    tags: ['music', 'lyrics'],
+  };
+
+  const updatedArticle = {
+    title: `Updated Title ${uniqueId}`,
+    description: 'This is the updated description',
+    body: 'This is the updated content',
+    tags: ['updated', 'article'],
+  };
+
+  const user = await signUpUser(email, password, username);
+
+  await page.addInitScript((token) => {
+    window.localStorage.setItem('jwtToken', token);
+  }, user.token);
+
+  await page.goto('/');
+
+  await navBar.expectUserLoggedIn(username);
+
+  // Create article
+  await navBar.newArticleLink.click();
+
+  await editorPage.createNewArticle(
+    newArticle.title,
+    newArticle.description,
+    newArticle.body,
+    newArticle.tags
+  );
+
+  await articlePage.expectHeadingToContain(newArticle.title);
+  await articlePage.expectAuthorToContain(username);
+
+  // Edit article
+  await articlePage.editArticleButton.click();
+
+  await editorPage.expectEditorToHaveArticle(newArticle);
+  await editorPage.updateArticle(
+    updatedArticle.title,
+    updatedArticle.description,
+    updatedArticle.body,
+    updatedArticle.tags
+  );
+
+  // Validate updated article
+  await articlePage.expectHeadingToContain(updatedArticle.title);
+  await articlePage.expectAuthorToContain(username);
+  await articlePage.expectBodyToContain(updatedArticle.body);
+  await articlePage.expectTagsToContain(updatedArticle.tags);
 });

@@ -13,7 +13,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
 
-    projects: [
+  projects: [
     {
       name: 'ui',
       testMatch: /tests\/ui\/.*\.spec\.ts/,
@@ -23,6 +23,7 @@ export default defineConfig({
     },
     {
       name: 'api',
+      workers: 1,
       testMatch: /tests\/api\/.*\.spec\.ts/,
       use: {
         baseURL: 'https://api.realworld.show/api/',
@@ -30,8 +31,7 @@ export default defineConfig({
     },
   ],
 
-  retries: 1,
-
+  retries: 2,
   reporter: [
     ['list'],
     ['html', { outputFolder: 'reports/html-report', open: 'never' }]

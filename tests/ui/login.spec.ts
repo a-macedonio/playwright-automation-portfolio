@@ -6,11 +6,11 @@ import { signUpUser } from '../../utils/api/authApi';
 import { RegisterPage } from '../../pages/RegisterPage';
 
 test('Successful login', async ({ page }) => {
-  const timestamp = Date.now();
+  const uniqueId = crypto.randomUUID().replace(/-/g, '');
 
-  const email = `andres_${timestamp}@test.com`;
+  const email = `andres_${uniqueId}@test.com`;
   const password = 'Password123';
-  const username = `andres_${timestamp}`;
+  const username = `andres_${uniqueId}`;
 
   await signUpUser(email, password, username);
 
@@ -29,11 +29,11 @@ test('Successful login', async ({ page }) => {
 
 test('Login with incorrect password', async ({ page }) => {
   const INVALID_PASSWORD = 'WrongPassword123';
-  const timestamp = Date.now();
+  const uniqueId = crypto.randomUUID().replace(/-/g, '');
 
-  const email = `andres_${timestamp}@test.com`;
+  const email = `andres_${uniqueId}@test.com`;
   const password = 'Password123';
-  const username = `andres_${timestamp}`;
+  const username = `andres_${uniqueId}`;
 
   await signUpUser(email, password, username);
 
