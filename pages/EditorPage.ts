@@ -8,6 +8,7 @@ export class EditorPage {
     readonly publishArticleButton: Locator;
     readonly tagsInput: Locator;
     readonly removeTagButtons: Locator;
+    readonly tagPills: Locator;
 
     constructor(page: Page) {
         this.page = page;
@@ -17,11 +18,14 @@ export class EditorPage {
         this.tagsInput = page.getByRole('textbox', { name: 'Enter tags' });
         this.publishArticleButton = page.getByRole('button', { name: 'Publish Article' });
         this.removeTagButtons = page.locator('.tag-list .ion-close-round');
+        this.tagPills = page.locator('.tag-list .tag-pill');
     }
 
     private async removeAllTags() {
-        while (await this.removeTagButtons.count() > 0) {
-            await this.removeTagButtons.first().click();
+        while (await this.tagPills.count() > 0) {
+            const countBefore = await this.tagPills.count();
+            await this.tagPills.first().locator('.ion-close-round').click();
+            await expect(this.tagPills).toHaveCount(countBefore - 1);
         }
     }
 
