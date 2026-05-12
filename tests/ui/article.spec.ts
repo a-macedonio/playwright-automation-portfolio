@@ -6,42 +6,39 @@ import { ArticlePage } from '../../pages/ArticlePage';
 
 test('Authenticated user can create a new article', async ({ page }) => {
 
-    const uniqueId = crypto.randomUUID().replace(/-/g, '');
+  const uniqueId = crypto.randomUUID().replace(/-/g, '');
 
-    const email = `andres_${uniqueId}@test.com`;
-    const password = 'Password123';
-    const username = `andres_${uniqueId}`;
+  const email = `andres_${uniqueId}@test.com`;
+  const password = 'Password123';
+  const username = `andres_${uniqueId}`;
 
-    const navBar = new Navbar(page);
-    const editorPage = new EditorPage(page);
-    const articlePage = new ArticlePage(page);
+  const navBar = new Navbar(page);
+  const editorPage = new EditorPage(page);
+  const articlePage = new ArticlePage(page);
 
-    const newArticle = {
-        title: `Generic Title ${uniqueId}`,
-        description: "This is a test article",
-        body: "This is test content",
-        tags: ["music", "lyrics"]
-    }
+  const newArticle = {
+    title: `Generic Title ${uniqueId}`,
+    description: "This is a test article",
+    body: "This is test content",
+    tags: ["music", "lyrics"]
+  }
 
-    const user = await signUpUser(email, password, username);
+  const user = await signUpUser(email, password, username);
 
-    // Inject JWT token into localStorage BEFORE the app loads.
-    // This bypasses UI login by simulating an already authenticated user
-    await page.addInitScript((token) => {
-        window.localStorage.setItem('jwtToken', token);
-    }, user.token);
+  // Inject JWT token into localStorage BEFORE the app loads.
+  // This bypasses UI login by simulating an already authenticated user
+  await page.addInitScript((token) => {
+    window.localStorage.setItem('jwtToken', token);
+  }, user.token);
 
-    await page.goto('/');
+  await page.goto('/');
 
-    await navBar.expectUserLoggedIn(username);
+  await navBar.expectUserLoggedIn(username);
 
-    await navBar.newArticleLink.click();
+  await navBar.newArticleLink.click();
 
-    await editorPage.createNewArticle(newArticle.title, newArticle.description, newArticle.body, newArticle.tags);
-    await articlePage.expectHeadingToContain(newArticle.title);
-    await articlePage.expectBodyToContain(newArticle.body);
-    await articlePage.expectAuthorToContain(username);
-    await articlePage.expectTagsToContain(newArticle.tags);
+  await editorPage.createNewArticle(newArticle);
+  await articlePage.expectArticleToBeDisplayed({ ...newArticle, author: username });
 });
 
 test('Authenticated user can edit own article', async ({ page }) => {
@@ -81,31 +78,14 @@ test('Authenticated user can edit own article', async ({ page }) => {
 
   // Create article
   await navBar.newArticleLink.click();
-
-  await editorPage.createNewArticle(
-    newArticle.title,
-    newArticle.description,
-    newArticle.body,
-    newArticle.tags
-  );
-
-  await articlePage.expectHeadingToContain(newArticle.title);
-  await articlePage.expectAuthorToContain(username);
+  await editorPage.createNewArticle(newArticle);
+  await articlePage.expectArticleToBeDisplayed({ ...newArticle, author: username });
 
   // Edit article
   await articlePage.editArticleButton.click();
-
   await editorPage.expectEditorToHaveArticle(newArticle);
-  await editorPage.updateArticle(
-    updatedArticle.title,
-    updatedArticle.description,
-    updatedArticle.body,
-    updatedArticle.tags
-  );
+  await editorPage.updateArticle(updatedArticle);
 
   // Validate updated article
-  await articlePage.expectHeadingToContain(updatedArticle.title);
-  await articlePage.expectAuthorToContain(username);
-  await articlePage.expectBodyToContain(updatedArticle.body);
-  await articlePage.expectTagsToContain(updatedArticle.tags);
+  await articlePage.expectArticleToBeDisplayed({ ...updatedArticle, author: username });
 });

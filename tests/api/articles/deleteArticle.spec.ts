@@ -29,6 +29,18 @@ test('DELETE /articles/:slug should delete an existing article', async ({ reques
     const createBody = await createResponse.json();
     const slug = createBody.article.slug;
 
+    // confirm article exists before deletion
+    const getResponseBeforeDelete = await request.get(`articles/${slug}`, {
+        headers: {
+            Authorization: `Token ${user.token}`,
+        },
+    });
+    expect(getResponseBeforeDelete.status()).toBe(200);
+    const getBodyBeforeDelete = await getResponseBeforeDelete.json();
+    expect(getBodyBeforeDelete.article.title).toBe(article.title);
+    expect(getBodyBeforeDelete.article.description).toBe(article.description);
+    expect(getBodyBeforeDelete.article.body).toBe(article.body);
+
     // Delete article
     const deleteResponse = await request.delete(`articles/${slug}`, {
         headers: {
@@ -39,14 +51,14 @@ test('DELETE /articles/:slug should delete an existing article', async ({ reques
     expect(deleteResponse.status()).toBe(204);
 
     // Assert: article no longer exists
-    const getResponse = await request.get(`articles/${slug}`, {
+    const getResponseAfterDelete = await request.get(`articles/${slug}`, {
         headers: {
             Authorization: `Token ${user.token}`,
         },
     });
 
-    expect(getResponse.status()).toBe(404);
-    const getBody = await getResponse.json();
-    expect(getBody.errors).toBeDefined();
-    expect(getBody.errors.article).toContain("not found");
+    expect(getResponseAfterDelete.status()).toBe(404);
+    const getBodyAfterDelete = await getResponseAfterDelete.json();
+    expect(getBodyAfterDelete.errors).toBeDefined();
+    expect(getBodyAfterDelete.errors.article).toContain("not found");
 });

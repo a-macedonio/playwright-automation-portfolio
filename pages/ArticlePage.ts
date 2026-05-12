@@ -1,4 +1,5 @@
 import { Locator, Page, expect } from "@playwright/test";
+import type { DisplayedArticleData } from '../types/article';
 
 export class ArticlePage {
     readonly page: Page;
@@ -18,19 +19,14 @@ export class ArticlePage {
         this.tags = page.locator('.tag-list .tag-pill');
     }
 
-    async expectHeadingToContain(title: string) {
-        await expect(this.heading).toHaveText(title);
+    async expectArticleToBeDisplayed(article: DisplayedArticleData) {
+        await expect(this.heading).toHaveText(article.title);
+        await expect(this.author).toContainText(article.author);
+        await expect(this.body).toContainText(article.body);
+        await this.expectTagsToContain(article.tags);
     }
 
-    async expectAuthorToContain(author: string) {
-        await expect(this.author).toContainText(author);
-    }
-
-    async expectBodyToContain(body: string) {
-        await expect(this.body).toContainText(body);
-    }
-
-    async expectTagsToContain(tags: string[]) {
+    private async expectTagsToContain(tags: string[]) {
         const tagsText = (await this.tags.allTextContents()).map(tag => tag.trim());
         for (const tag of tags) {
             expect(tagsText).toContain(tag);
