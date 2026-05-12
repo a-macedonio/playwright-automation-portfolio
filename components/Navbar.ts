@@ -18,15 +18,22 @@ export class Navbar {
         this.settingsLink = this.page.getByRole('link', { name: 'Settings' });
     }
 
-    async clickSignIn() {
-        await this.signInLink.click();
+    private async getLoggedInUsername() {
+        const profileLink = this.page
+            .locator('app-layout-header')
+            .locator('a[href^="/profile/"]');
+
+        await expect(profileLink, 'Expected a profile link in the navbar').toBeVisible();
+
+        return (await profileLink.innerText()).trim();
     }
 
-    userLink(username: string) {
-        return this.page.getByRole('link', { name: username });
-    }
+    async expectUserLoggedIn(expectedUsername: string) {
+        const actualUsername = await this.getLoggedInUsername();
 
-    async expectUserLoggedIn(username: string) {
-        await expect(this.userLink(username)).toBeVisible();
+        expect(
+            actualUsername,
+            `Auth identity mismatch: expected "${expectedUsername}", but UI is logged in as "${actualUsername}". Possible backend token collision/session contamination.`
+        ).toBe(expectedUsername);
     }
 }

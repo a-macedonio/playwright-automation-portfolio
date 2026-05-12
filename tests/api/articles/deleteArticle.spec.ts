@@ -1,16 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { signUpUser } from '../../../utils/api/authApi';
+import { ArticlePayload } from '../../../types/article';
 
 test('DELETE /articles/:slug should delete an existing article', async ({ request }) => {
     // Create user and article
-    const uniqueId = crypto.randomUUID().replace(/-/g, '');
-    const username = `testuser_${uniqueId}`;
-    const email = `testuser_${uniqueId}@mail.com`;
-    const password = 'Password123!';
+    const uniqueId = crypto.randomUUID().slice(0, 8);
+    const username = `user_${uniqueId}`;
+    const email = `${username}@test.com`;
 
-    const user = await signUpUser(email, password, username);
+    const user = await signUpUser({ email, username });
 
-    const article = {
+    const article: ArticlePayload = {
         title: `Delete Article ${uniqueId}`,
         description: 'Article to be deleted',
         body: 'This article will be deleted',
@@ -35,8 +35,11 @@ test('DELETE /articles/:slug should delete an existing article', async ({ reques
             Authorization: `Token ${user.token}`,
         },
     });
+
     expect(getResponseBeforeDelete.status()).toBe(200);
+
     const getBodyBeforeDelete = await getResponseBeforeDelete.json();
+    
     expect(getBodyBeforeDelete.article.title).toBe(article.title);
     expect(getBodyBeforeDelete.article.description).toBe(article.description);
     expect(getBodyBeforeDelete.article.body).toBe(article.body);
@@ -58,7 +61,9 @@ test('DELETE /articles/:slug should delete an existing article', async ({ reques
     });
 
     expect(getResponseAfterDelete.status()).toBe(404);
+
     const getBodyAfterDelete = await getResponseAfterDelete.json();
+
     expect(getBodyAfterDelete.errors).toBeDefined();
     expect(getBodyAfterDelete.errors.article).toContain("not found");
 });

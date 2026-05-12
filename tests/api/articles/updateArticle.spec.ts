@@ -1,15 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { signUpUser } from '../../../utils/api/authApi';
+import { ArticlePayload } from '../../../types/article';
 
 test('PUT /articles/:slug should update an existing article', async ({ request }) => {
     //Act 1: Creating a new article
-    const uniqueId = crypto.randomUUID().replace(/-/g, '');
-    const username = `testuser_${uniqueId}`;
-    const email = `testuser_${uniqueId}@mail.com`;
-    const password = 'Password123!';
-    const user = await signUpUser(email, password, username);
+    const uniqueId = crypto.randomUUID().slice(0, 8);
+    const username = `user_${uniqueId}`;
+    const email = `${username}@test.com`;
 
-    const article = {
+    const user = await signUpUser({email, username});
+
+    const article: ArticlePayload = {
         title: `Original Article ${uniqueId}`,
         description: 'This an original new article',
         body: 'This is the original article content',
@@ -30,7 +31,7 @@ test('PUT /articles/:slug should update an existing article', async ({ request }
     const slug = createBody.article.slug;
     expect(createBody.article.slug).toEqual(expect.any(String));
     expect(createBody).toHaveProperty('article');
-    expect(createBody.article.author.username).toBe(user.username);
+    expect(createBody.article.author.username).toBe(username);
 
     const updatedArticle = {
         title: `Updated Article ${uniqueId}`,
@@ -84,14 +85,13 @@ test('PUT /articles/:slug should update an existing article', async ({ request }
 
 test('PUT /articles/:slug should update only provided fields', async ({ request }) => {
   // Create user and article
-  const uniqueId = crypto.randomUUID().replace(/-/g, '');
-  const username = `testuser_${uniqueId}`;
-  const email = `testuser_${uniqueId}@mail.com`;
-  const password = 'Password123!';
+  const uniqueId = crypto.randomUUID().slice(0, 8);
+  const username = `user_${uniqueId}`;
+  const email = `${username}@test.com`;
 
-  const user = await signUpUser(email, password, username);
+  const user = await signUpUser({ email, username });
 
-  const article = {
+  const article: ArticlePayload = {
     title: `Partial Update Article ${uniqueId}`,
     description: 'Original description',
     body: 'Original body content',

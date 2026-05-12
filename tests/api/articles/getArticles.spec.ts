@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { signUpUser } from '../../../utils/api/authApi';
+import { ArticlePayload } from '../../../types/article';
 
 test('GET /articles should return articles list', async ({ request }) => {
     const response = await request.get('articles');
@@ -19,13 +20,13 @@ test('GET /articles should return articles list', async ({ request }) => {
 });
 
 test('POST /articles should persist article and retrieve it by slug', async ({ request }) => {
-    const uniqueId = crypto.randomUUID().replace(/-/g, '');
-    const username = `testuser_${uniqueId}`;
-    const email = `testuser_${uniqueId}@mail.com`;
-    const password = 'Password123!';
-    const user = await signUpUser(email, password, username);
+    const uniqueId = crypto.randomUUID().slice(0, 8);
+    const username = `user_${uniqueId}`;
+    const email = `${username}@test.com`;
 
-    const article = {
+    const user = await signUpUser({ email, username });
+
+    const article: ArticlePayload = {
         title: `Persisted Article ${uniqueId}`,
         description: 'This article should be retrievable by slug',
         body: 'This is the persisted article content',
@@ -43,12 +44,19 @@ test('POST /articles should persist article and retrieve it by slug', async ({ r
 
     const createBody = await createResponse.json();
 
-    const slug = createBody.article.slug;
     expect(createBody.article.slug).toEqual(expect.any(String));
 
     expect(createBody).toHaveProperty('article');
 
+    expect(
+        createBody.article.author.username,
+        `Auth identity mismatch during article creation. Expected article author "${username}", but API created the article as "${createBody.article.author.username}". Token used: ${user.token}`
+    ).toBe(username);
+
     //Retrieving article by slug
+    const slug = createBody.article.slug;
+    expect(slug).toEqual(expect.any(String));
+    
     const getResponse = await request.get(`articles/${slug}`, {
         headers: {
             Authorization: `Token ${user.token}`,

@@ -3,9 +3,9 @@ import { test, expect, request } from '@playwright/test';
 
 test('POST /users should create a new user successfully', async ({ request }) => {
 
-    const uniqueId = Date.now();
-    const username = `testuser_${uniqueId}`;
-    const email = `testuser_${uniqueId}@mail.com`;
+    const uniqueId = crypto.randomUUID().slice(0, 8);
+    const username = `user_${uniqueId}`;
+    const email = `${username}@test.com`;
     const password = 'Password123!';
 
     const response = await request.post('users', {
@@ -35,8 +35,8 @@ test('POST /users should create a new user successfully', async ({ request }) =>
 });
 
 test('POST /users should reject request with missing email', async ({ request }) => {
-    const uniqueId = Date.now();
-    const username = `testuser_${uniqueId}`;
+    const uniqueId = crypto.randomUUID().slice(0, 8);
+    const username = `user_${uniqueId}`;
     const password = 'Password123!';
 
     const response = await request.post('users', {

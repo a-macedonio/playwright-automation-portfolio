@@ -1,15 +1,15 @@
 import { test, expect } from '@playwright/test';
 import { signUpUser } from '../../../utils/api/authApi';
+import { ArticlePayload } from '../../../types/article.ts';
 
 test('POST /articles should create a new article for an authenticated user', async ({ request }) => {
+    const uniqueId = crypto.randomUUID().slice(0, 8);
+    const username = `user_${uniqueId}`;
+    const email = `user_${uniqueId}@test.com`;
 
-    const uniqueId = crypto.randomUUID().replace(/-/g, '');
-    const username = `testuser_${uniqueId}`;
-    const email = `testuser_${uniqueId}@mail.com`;
-    const password = 'Password123!';
-    const user = await signUpUser(email, password, username);
+    const user = await signUpUser({username,email});
 
-    const article = {
+    const article: ArticlePayload = {
         title: `Generic Title ${uniqueId}`,
         description: "This is a test article",
         body: "This is test content",
@@ -55,7 +55,7 @@ test('POST /articles should create a new article for an authenticated user', asy
 });
 
 test('POST /articles should not create article without authentication', async ({ request }) => {
-    const article = {
+    const article: ArticlePayload = {
         title: 'Unauthorized Article',
         description: 'This request should fail',
         body: 'Unauthorized users should not create articles',
@@ -74,12 +74,8 @@ test('POST /articles should not create article without authentication', async ({
 });
 
 test('POST /articles should not create article with missing required fields', async ({ request }) => {
-    const uniqueId = crypto.randomUUID().replace(/-/g, '');
-    const username = `testuser_${uniqueId}`;
-    const email = `testuser_${uniqueId}@mail.com`;
-    const password = 'Password123!';
 
-    const user = await signUpUser(email, password, username);
+    const user = await signUpUser();
 
     const invalidArticle = {
         title: '',

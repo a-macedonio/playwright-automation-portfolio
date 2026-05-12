@@ -5,10 +5,10 @@ import { HomePage } from '../../pages/HomePage';
 import { LoginPage } from '../../pages/LoginPage';
 
 test('Successful SignUp', async ({ page }) => {
-    const uniqueId = crypto.randomUUID().replace(/-/g, '');
-    const username = 'Rigo'
-    const email = `rigo_${uniqueId}@test.com`;
-    const password = 'Password123'
+    const uniqueId = crypto.randomUUID().slice(0, 8);
+    const username = `user_${uniqueId}`;
+    const email = `${username}@test.com`;
+    const password = 'Password123';
 
     const registerPage = new RegisterPage(page);
     const navbar = new Navbar(page);

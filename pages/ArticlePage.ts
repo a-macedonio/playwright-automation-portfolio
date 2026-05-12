@@ -23,7 +23,7 @@ export class ArticlePage {
         await expect(this.heading).toHaveText(article.title);
         await expect(this.author).toContainText(article.author);
         await expect(this.body).toContainText(article.body);
-        await this.expectTagsToContain(article.tags);
+        await this.expectTagsToContain(article.tagList);
     }
 
     private async expectTagsToContain(tags: string[]) {

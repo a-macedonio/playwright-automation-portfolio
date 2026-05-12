@@ -1,5 +1,5 @@
 import { expect, Locator, Page } from "@playwright/test";
-import type { ArticleFormData, ArticleEditorValues } from '../types/article';
+import type { ArticlePayload } from '../types/article';
 
 export class EditorPage {
     readonly page: Page;
@@ -28,11 +28,11 @@ export class EditorPage {
         }
     }
 
-    private async fillArticleForm(article: ArticleFormData) {
+    private async fillArticleForm(article: ArticlePayload) {
         await this.titleInput.fill(article.title);
         await this.descriptionInput.fill(article.description);
         await this.bodyInput.fill(article.body);
-        await this.addTags(article.tags);
+        await this.addTags(article.tagList);
     }
 
     private async addTags(tags: string[]) {
@@ -49,18 +49,18 @@ export class EditorPage {
         ]);
     }
 
-    async createNewArticle(article: ArticleFormData) {
+    async createNewArticle(article: ArticlePayload) {
         await this.fillArticleForm(article);
         await this.submitArticle();
     }
 
-    async updateArticle(article: ArticleFormData) {
+    async updateArticle(article: ArticlePayload) {
         await this.removeAllTags();
         await this.fillArticleForm(article);
         await this.submitArticle();
     }
 
-    async expectEditorToHaveArticle(article: ArticleEditorValues) {
+    async expectEditorToHaveArticle(article: ArticlePayload) {
         await expect(this.titleInput).toHaveValue(article.title);
         await expect(this.descriptionInput).toHaveValue(article.description);
         await expect(this.bodyInput).toHaveValue(article.body);

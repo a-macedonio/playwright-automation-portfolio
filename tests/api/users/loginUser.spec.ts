@@ -4,19 +4,15 @@ import {signUpUser} from '../../../utils/api/authApi';
 
 test('POST /users/login should login an existing user successfully', async ({request}) => {
 
-     
-    const uniqueId = Date.now();
-    const username = `testuser_${uniqueId}`;
-    const email = `testuser_${uniqueId}@mail.com`;
-    const password = 'Password123!';
 
-    await signUpUser(email,password,username);
+    const password = 'TestPassword123!';
+    const user = await signUpUser({password});
 
     const response = await request.post('users/login',{
         data: {
             user:{
-                email:email,
-                password:password
+                email: user.email,
+                password
             }
         }
     });
@@ -25,8 +21,8 @@ test('POST /users/login should login an existing user successfully', async ({req
     const body = await response.json();
 
     expect(body.user).toBeDefined();
-    expect(body.user.email).toBe(email);
-    expect(body.user.username).toBe(username);
+    expect(body.user.email).toBe(user.email);
+    expect(body.user.username).toBe(user.username);
     expect(body.user.token).toBeTruthy();
     expect(body.user.bio).toBeNull();
     expect(body.user.image).toBeNull();

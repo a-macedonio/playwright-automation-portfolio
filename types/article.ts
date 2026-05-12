@@ -1,12 +1,10 @@
-export type ArticleFormData = {
-    title: string;
-    description: string;
-    body: string;
-    tags: string[];
+export type ArticlePayload = {
+  title: string;
+  description: string;
+  body: string;
+  tagList: string[];
 };
 
-export type ArticleEditorValues = Omit<ArticleFormData, 'tags'>;
-
-export type DisplayedArticleData = Omit<ArticleFormData, 'description'> & {
-    author: string;
+export type DisplayedArticleData = Omit<ArticlePayload, 'description'> & {
+  author: string;
 };

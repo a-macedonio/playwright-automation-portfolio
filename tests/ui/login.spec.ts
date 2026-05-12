@@ -6,13 +6,13 @@ import { signUpUser } from '../../utils/api/authApi';
 import { RegisterPage } from '../../pages/RegisterPage';
 
 test('Successful login', async ({ page }) => {
-  const uniqueId = crypto.randomUUID().replace(/-/g, '');
+  const uniqueId = crypto.randomUUID().slice(0, 8);
 
-  const email = `andres_${uniqueId}@test.com`;
   const password = 'Password123';
-  const username = `andres_${uniqueId}`;
+  const username = `user_${uniqueId}`;
+  const email = `${username}@test.com`;
 
-  await signUpUser(email, password, username);
+  await signUpUser({ email, username, password });
 
   const loginPage = new LoginPage(page);
   const navBar = new Navbar(page);
@@ -29,13 +29,13 @@ test('Successful login', async ({ page }) => {
 
 test('Login with incorrect password', async ({ page }) => {
   const INVALID_PASSWORD = 'WrongPassword123';
-  const uniqueId = crypto.randomUUID().replace(/-/g, '');
+  const uniqueId = crypto.randomUUID().slice(0, 8);
 
-  const email = `andres_${uniqueId}@test.com`;
   const password = 'Password123';
-  const username = `andres_${uniqueId}`;
+  const username = `user_${uniqueId}`;
+  const email = `${username}@test.com`;
 
-  await signUpUser(email, password, username);
+  await signUpUser({ email, username, password });
 
   const loginPage = new LoginPage(page);
 
@@ -46,7 +46,7 @@ test('Login with incorrect password', async ({ page }) => {
 });
 
 test('Login with non-existent email', async ({ page }) => {
-  const NON_EXISTENT_USER = `nonexistent_${Date.now()}@test.com`;
+  const NON_EXISTENT_USER = `nonexistent_${crypto.randomUUID().slice(0, 8)}@test.com`;
   const loginPage = new LoginPage(page);
 
   await loginPage.goto();
